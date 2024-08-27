@@ -1,0 +1,18 @@
+---
+- name: Netbox - Create databases
+  become: true
+  become_user: postgres
+  postgresql_db:
+    port: "{{ netbox_db.postgres.port }}"
+    name: "{{ netbox_db.postgres.name }}"
+  delegate_to: "{{ netbox_db.postgres.host }}"
+
+- name: Netbox - Create database user
+  become: true
+  become_user: postgres
+  postgresql_user:
+    port: "{{ netbox_db.postgres.port }}"
+    db: "{{ netbox_db.postgres.name }}"
+    name: "{{ netbox_db.postgres.user }}"
+    password: "{{ netbox_db.postgres.pass }}"
+  delegate_to: "{{ netbox_db.postgres.host }}"

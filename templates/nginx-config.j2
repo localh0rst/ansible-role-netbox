@@ -1,0 +1,35 @@
+server {
+    #listen [::]:80 ssl ipv6only=off;
+    listen [::]:80 ipv6only=off;
+
+    # CHANGE THIS TO YOUR SERVER'S NAME
+    server_name {{ netbox_nginx.servername }};
+
+    #ssl_certificate /etc/ssl/certs/netbox.crt;
+    #ssl_certificate_key /etc/ssl/private/netbox.key;
+
+    client_max_body_size 25m;
+    proxy_connect_timeout 600s;
+    proxy_send_timeout 600s;
+    proxy_read_timeout 600s;
+    send_timeout 600s;
+
+    location /static/ {
+        alias {{ netbox_user_home }}/netbox/netbox/static/;
+    }
+
+    location / {
+        proxy_pass http://{{netbox_gunicorn.ip}}:{{netbox_gunicorn.port}};
+        proxy_set_header X-Forwarded-Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        #proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+}
+
+#server {
+#  # Redirect HTTP traffic to HTTPS
+#  listen [::]:80 ipv6only=off;
+#  server_name _;
+#  return 301 https://$host$request_uri;
+#}

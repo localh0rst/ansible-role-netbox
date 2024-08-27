@@ -1,0 +1,18 @@
+---
+- name: Netbox - Generate systemd service netbox-gunicorn
+  template:
+    src: "netbox.service.j2"
+    dest: /etc/systemd/system/netbox.service
+    mode: "0644"
+  notify:
+    - "reload systemd"
+    - "restart netbox"
+
+- name: Netbox - Generate systemd service netbox-rq
+  template:
+    src: "netbox-rq.service.j2"
+    dest: /etc/systemd/system/netbox-rq.service
+    mode: "0644"
+  notify:
+    - "reload systemd"
+    - "restart netbox-rq"

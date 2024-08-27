@@ -1,0 +1,12 @@
+---
+- name: Netbox - Create superusers
+  shell: "DJANGO_SUPERUSER_PASSWORD={{ item.pass }} {{ netbox_user_home }}/netbox/venv/bin/python3 {{ netbox_user_home }}/netbox/netbox/manage.py createsuperuser --no-input --email {{ item.email }} --username {{ item.user }}"
+  with_items: "{{ netbox_superusers }}"
+  loop_control:
+    index_var: superuser_index
+  register:
+    netbox_superuser
+  changed_when: netbox_superuser.stdout == 'Superuser created successfully.'
+  failed_when: False
+  ignore_errors: True
+  no_log: True

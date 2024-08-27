@@ -1,0 +1,9 @@
+---
+- include_tasks: install-dependencies.yml
+- include_tasks: install-netbox.yml
+- include_tasks: configure-databases.yml
+- include_tasks: configure-netbox.yml
+- include_tasks: run-upgrade.yml
+- include_tasks: create-superuser.yml
+- include_tasks: configure-nginx.yml
+- include_tasks: install-services.yml

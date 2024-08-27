@@ -1,0 +1,102 @@
+---
+netbox_user: netbox
+netbox_group: netbox
+netbox_user_home: "/opt/{{ netbox_user }}"
+netbox_scripts_dir: "{{ netbox_user_home }}/scripts"
+netbox_reports_dir: "{{ netbox_user_home }}/reports"
+netbox_version: "3.7.3"
+netbox_download_link: "https://github.com/netbox-community/netbox/archive/refs/tags/v{{netbox_version}}.tar.gz"
+
+# Weather to run the upgrade script every time or only on specific changes
+netbox_force_upgrade: True
+
+netbox_gunicorn:
+  ip: 127.0.0.1
+  port: 8000
+  workers: 5
+  threads: 3
+  timeout: 120
+  max_requests: 5000
+  max_requests_jitter: 500
+
+netbox_nginx:
+  servername: netbox.mydomain.de
+  use_ssl: False
+  # TODO: Add SSL options...
+
+netbox_db:
+  postgres:
+    name: netbox
+    host: 127.0.0.1
+    port: 5436
+    user: netbox
+    pass: passw0rd!
+  redis:
+    tasks:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+    caching:
+      host: 127.0.0.1
+      port: 6379
+      database: 1
+
+
+netbox_allowed_hosts: 
+  - netbox.mydomain.de
+  - blubb.netbox.local
+
+netbox_secret_key: ch@ngeMeInPr0duCt!on
+
+netbox_admins:
+  - name: Postmaster
+    email: postmaster@mydomain.de
+
+netbox_allow_token_retrieval: False
+netbox_base_path: ''
+
+netbox_login_required: True
+
+netbox_superusers:
+  - user: netbox
+    email: netbox@mydomain.de
+    pass: MyLittleP@$$w0rd!!
+  - user: netbox123
+    email: netbox123@mydomain.de
+    pass: an0th3rPa$$w0rd!!!
+
+#netbox_plugins:
+#  - name: netbox_bgp
+#    module: netbox-bgp
+#    config: 
+#      device_ext_page: right
+#      top_level_menu: False
+#  - name: netbox_documents
+#    module: netbox-documents
+#  - name: netbox_secrets
+#    modul: netbox-secrets
+#    manage: collectstatic --no-input
+
+netbox_remote_auth:
+  enabled: False
+  backend: 'netbox.authentication.remoteuserbackend'
+  header: 'http_remote_user'
+  user_first_name: 'http_remote_user_first_name'
+  user_last_name: 'http_remote_user_last_name'
+  user_email: 'http_remote_user_email'
+  auto_create_user: True
+  default_groups: []
+  default_permissions: {}
+  additional_values:
+    REMOTE_AUTH_BACKEND: 'social_core.backends.azuread.AzureADOAuth2'
+    SOCIAL_AUTH_AZUREAD_OAUTH2_KEY: '{APPLICATION_ID}'
+    SOCIAL_AUTH_AZUREAD_OAUTH2_SECRET: '{SECRET_VALUE}'
+
+netbox_email:
+  from: netbox@myddomain.de
+
+netbox_timezone: UTC
+
+netbox_banner:
+  top: 'Netbox Production Server'
+  bottom: 'Netbox Production Server'

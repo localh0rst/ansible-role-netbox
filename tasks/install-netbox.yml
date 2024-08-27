@@ -1,0 +1,124 @@
+---
+- name: Netbox - Create Systemuser
+  user:
+    state: present
+    name: "{{ netbox_user }}"
+    #home: "{{ netbox_user_home }}"
+    comment: "Netbox Systemuser"
+    create_home: False
+    system: true
+    #shell: /bin/bash
+
+- name: Netbox - Create netbox directory
+  file:
+    state: directory
+    path: "{{ netbox_user_home }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: "0755"
+
+- name: Netbox - Create directories
+  file:
+    state: directory
+    path: "{{ netbox_user_home }}/versions/"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: "0755"
+
+- name: Netbox - Download requested version
+  get_url:
+    url: "{{ netbox_download_link }}"
+    dest: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}.tar.gz"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: "0644"
+
+- name: Netbox - Create directories
+  file:
+    state: directory
+    path: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: "0755"
+
+- name: Netbox - Create scripts directory
+  file:
+    state: directory
+    path: "{{ netbox_scripts_dir }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: "0775"
+
+- name: Netbox - Create reports directory
+  file:
+    state: directory
+    path: "{{ netbox_reports_dir }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: "0775"
+
+- name: Netbox - Unpacking
+  unarchive:
+    remote_src: yes
+    src: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}.tar.gz"
+    dest: "{{ netbox_user_home }}/versions/"
+    owner: "{{netbox_user}}"
+    group: "{{netbox_group}}"
+    mode: "0755"
+
+- name: Netbox - Create softlinks
+  file:
+    src: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}"
+    dest: "{{ netbox_user_home }}/netbox"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    state: link
+  register: netbox_link_changed
+
+- name: Netbox - Copy default scripts directory
+  copy:
+    src: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}/netbox/scripts"
+    dest: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}/netbox/__scripts_default"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    remote_src: yes
+
+- name: Netbox - Delete default scripts directory
+  file:
+    path: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}/netbox/scripts"
+    state: directory
+    state: absent
+
+- name: Netbox - Copy default reports directory
+  copy:
+    src: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}/netbox/reports"
+    dest: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}/netbox/__reports_default"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    remote_src: yes
+
+- name: Netbox - Delete default reports directory
+  file:
+    path: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}/netbox/reports"
+    state: directory
+    state: absent
+
+- name: Netbox - Create scripts softlinks
+  file:
+    dest: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}/netbox/scripts"
+    src: "{{ netbox_scripts_dir }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    state: link
+    force: yes
+  register: netbox_link_changed
+
+- name: Netbox - Create reports softlinks
+  file:
+    dest: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}/netbox/reports"
+    src: "{{ netbox_reports_dir }}"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    state: link
+    force: yes
+  register: netbox_link_changed

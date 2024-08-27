@@ -1,0 +1,28 @@
+---
+- name: Netbox - Run upgrade script
+  shell: "{{ netbox_user_home }}/netbox/upgrade.sh"
+  #shell: "{{ netbox_user_home }}/versions/netbox-{{ netbox_version }}/upgrade.sh"
+  args:
+    executable: /bin/bash
+  when:
+    - netbox_plugin_changed.changed or netbox_link_changed.changed or netbox_force_upgrade
+  register:
+    netbox_upgrade_script
+
+- name: Netbox - Plugin commands
+  shell: "{{ netbox_user_home }}/netbox/venv/bin/python3 {{ netbox_user_home }}/netbox/netbox/manage.py {{ item.manage}}"
+  args:
+    executable: /bin/bash
+  with_items:
+    - "{{ netbox_plugins }}"
+  when:
+    - ('manage' in item) and (netbox_plugin_changed.changed or netbox_link_changed.changed or netbox_force_upgrade)
+
+- name: Netbox - Run migrations
+  shell: "{{ netbox_user_home }}/netbox/venv/bin/python3 {{ netbox_user_home }}/netbox/netbox/manage.py migrate"
+  args:
+    executable: /bin/bash
+  when:
+    - netbox_plugin_changed.changed or netbox_link_changed.changed
+  register: netbox_migrations_changed
+  changed_when: not netbox_migrations_changed.stdout == 'No migrations to apply.'

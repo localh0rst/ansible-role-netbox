@@ -1,0 +1,39 @@
+---
+- name: Netbox - Create local_requirements.txt
+  template:
+    src: local_requirements.txt.j2
+    dest: "{{ netbox_user_home }}/netbox/local_requirements.txt"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: "0660"
+  register: netbox_plugin_changed
+
+
+- name: Netbox - Configure Netbox
+  template:
+    src: "{{ lookup('ansible.builtin.first_found', netbox_conf)}}"
+    dest: "{{ netbox_user_home }}/netbox/netbox/netbox/configuration.py"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: "0660"
+    backup: True
+  vars:
+    netbox_conf:
+      - "templates/configuration_{{ netbox_version }}.py.j2"
+      - "templates/configuration_default.py.j2"
+
+- name: Netbox - Configure Gunicorn
+  template:
+    src: gunicorn.py.j2
+    dest: "{{ netbox_user_home }}/netbox/gunicorn.py"
+    owner: "{{ netbox_user }}"
+    group: "{{ netbox_group }}"
+    mode: "0660"
+
+- name: Netbox - Create Cronjobs (Housekeeping Tasks)
+  cron:
+    name: Netbox Housekeeping Tasks
+    special_time: daily
+    state: present
+    job: "{{ netbox_user_home }}/netbox/venv/bin/python {{ netbox_user_home }}/netbox/netbox/manage.py housekeeping"
+
